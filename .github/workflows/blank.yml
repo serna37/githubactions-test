@@ -1,0 +1,53 @@
+name: sample action
+
+on:
+  schedule:
+    - cron: 0 0 25-30,1-2 */1 *
+  workflow_dispatch:
+
+jobs:
+  getinfo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: SSH Access
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          port: ${{ secrets.PORT }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd git/githubactions-test
+            git pull
+            python　sample.py
+  sendmail:
+    needs: getinfo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: Display Python version
+        run: |
+          python -V
+      - name: Install Library
+        run: |
+          pip install -r requirements.txt
+      - name: Exec
+        run: |
+          python create_mail.py
+      - name: Send Mail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_HOST }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: 🧸【実行結果】- ${{ github.repository }}
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
+          html_body: file://sendmail.html
