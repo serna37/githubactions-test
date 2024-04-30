@@ -40,8 +40,8 @@ sequenceDiagram
     GitHub->>+Server: SSH
     Server-->>Server: python
     Server-->>ChromeDriver: selenium
-    ChromeDriver-->>SmartHR: scraping
-    SmartHR-->>ChromeDriver: info
+    ChromeDriver-->>取得したいサイト: scraping
+    取得したいサイト-->>ChromeDriver: info
     ChromeDriver-->>Server: info
     Server-->>Sheet: write
     Server->>-GitHub: done
